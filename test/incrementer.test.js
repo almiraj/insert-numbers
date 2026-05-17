@@ -206,6 +206,42 @@ describe("non-ASCII decimal numberic", () => {
   }
 });
 
+describe("Chinese numeric", () => {
+  const examples = [
+    ["一", ["一", "二", "三", "四"]],
+    ["九", ["九", "十", "十一", "十二"]],
+    ["十", ["十", "十一", "十二", "十三"]],
+    ["二十五", ["二十五", "二十六", "二十七", "二十八"]],
+    ["九十九", ["九十九", "百", "百一", "百二"]],
+    ["百", ["百", "百一", "百二", "百三"]],
+    ["百九十八", ["百九十八", "百九十九", "二百", "二百一"]],
+    ["九百九十八", ["九百九十八", "九百九十九", "一", "二"]],
+    ["第九章", ["第九章", "第十章", "第十一章", "第十二章"]],
+    ["第九章 第十節", ["第九章 第十節", "第十章 第十節", "第十一章 第十節", "第十二章 第十節"]]
+  ];
+
+  for (const [source, expected] of examples) {
+    it(`formats ${source}`, () => {
+      assert.deepEqual(incrementFor(source, expected.length), expected);
+    });
+  }
+});
+
+describe("avoid parsing as Chinese numeric", () => {
+  const examples = [
+    ["一百", ["一百", "一百", "一百", "一百"]],
+    ["一百二", ["一百二", "一百二", "一百二", "一百二"]],
+    ["一十", ["一十", "一十", "一十", "一十"]],
+    ["一十二", ["一十二", "一十二", "一十二", "一十二"]]
+  ];
+
+  for (const [source, expected] of examples) {
+    it(`formats ${source}`, () => {
+      assert.deepEqual(incrementFor(source, expected.length), expected);
+    });
+  }
+});
+
 describe("parsing as date (for Zero Padding)", () => {
   const examples = [
     ["4/29", ["4/29", "4/30", "5/1", "5/2"]],
@@ -396,7 +432,6 @@ describe("validates Unicode-ordered characterSet sequences", () => {
 
 describe("characterSets loops", () => {
   const examples = [
-    ["九", ["九", "十", "一", "二"]],
     ["㉙", ["㉙", "㉚", "①", "②"]],
     ["Ⅺ", ["Ⅺ", "Ⅻ", "Ⅰ", "Ⅱ"]],
     ["y", ["y", "z", "a", "b"]],

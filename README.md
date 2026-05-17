@@ -13,16 +13,6 @@ An extension to insert increasing numbers.
 * Command: `Insert Numbers Ex`
 * Keybindings: `ctrl+alt+n` on Windows and Linux or `cmd+alt+n` on macOS
 
-## Settings
-
-No settings required. No more `settings.json`.
-
-## Caution
-
-VS Code's Command Palette may ignore leading spaces in the input.
-
-If you need space padding, include another visible character in the pattern, such as `[ 1]`.
-
 ## Thanks
 
 Thanks to Asuka for the original [Insert Numbers](https://marketplace.visualstudio.com/items?itemName=Asuka.insertnumbers) extension, which I have long loved.

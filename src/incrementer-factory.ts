@@ -139,6 +139,52 @@ export default class IncrementerFactory {
   }
 
   /**
+   * Creates a Chinese numeric incrementer.
+   * Supports numbers from `一` to `九百九十九`, wrapping back to `一`.
+   */
+  static createChineseNumericIncrementer(source: string): Incrementer | undefined {
+    const match = /^(.*?)([二三四五六七八九]?百(?:[二三四五六七八九]?十)?[一二三四五六七八九]?|[二三四五六七八九]?十[一二三四五六七八九]?|[一二三四五六七八九])(.*)$/u.exec(source);
+    if (!match) {
+      return undefined;
+    }
+
+    const [, prefix, chineseNumber, suffix] = match;
+    if (/[一二三四五六七八九十百]$/u.test(prefix) || /^[一二三四五六七八九十百]/u.test(suffix)) {
+      return undefined;
+    }
+
+    const numericMatch = /^((?:[二三四五六七八九]?百)?)((?:[二三四五六七八九]?十)?)((?:[一二三四五六七八九])?)$/u.exec(chineseNumber);
+    if (!numericMatch) {
+      return undefined;
+    }
+
+    const [, hyaku, juu, ichi] = numericMatch;
+    const numericMap: Record<string, number> = {
+      "百": 100, "二百": 200, "三百": 300, "四百": 400, "五百": 500, "六百": 600, "七百": 700, "八百": 800, "九百": 900,
+      "十": 10, "二十": 20, "三十": 30, "四十": 40, "五十": 50, "六十": 60, "七十": 70, "八十": 80, "九十": 90,
+      "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9
+    };
+
+    const start = (numericMap[hyaku] ?? 0) + (numericMap[juu] ?? 0) + (numericMap[ichi] ?? 0);
+
+    const format = (value: number) => {
+      const hyakuMembers = ["", "百", "二百", "三百", "四百", "五百", "六百", "七百", "八百", "九百"];
+      const juuMembers = ["", "十", "二十", "三十", "四十", "五十", "六十", "七十", "八十", "九十"];
+      const ichiMembers = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+
+      const hyakuValue = Math.floor(value / 100);
+      const juuValue = Math.floor((value % 100) / 10);
+      const ichiValue = value % 10;
+      return `${hyakuMembers[hyakuValue]}${juuMembers[juuValue]}${ichiMembers[ichiValue]}`;
+    };
+
+    return (index: number) => {
+      const value = ((start - 1 + index) % 999) + 1;
+      return `${prefix}${format(value)}${suffix}`;
+    };
+  }
+
+  /**
    * Creates a character incrementer.
    * Supports patterns like ①, Ⅰ, `(a)` and `ア`.
    * Returns `undefined` when `0-9` or `０-９` appears before a supported character.
@@ -147,7 +193,6 @@ export default class IncrementerFactory {
     const charMemberSets = [
       "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚",
       "ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ",
-      "一二三四五六七八九十",
       "abcdefghijklmnopqrstuvwxyz",
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
       "αβγδεζηθικλμνξοπρστυφχψω",
